@@ -16,6 +16,12 @@
         "psr-4": {
             "FBLinkPreview\\": "php/classes"
         }
-    }
+    },
+    "respositories": [
+        {
+            "type": "git",
+    	    "url": "https://github.com/accounts-bay/Facebook-Link-Preview"
+        }
+    ]
 }
 
