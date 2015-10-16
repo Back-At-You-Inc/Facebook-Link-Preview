@@ -8,6 +8,7 @@
  */
 
 /** This class handles url analysis */
+namespace baymedia\facebooklinkpreview;
 
 class Url
 {

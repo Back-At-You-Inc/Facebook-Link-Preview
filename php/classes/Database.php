@@ -8,6 +8,7 @@
  */
 
 /** This class is for database connection. It's just an example, neither security is being handled here nor mysql errors that might be occurred. */
+namespace baymedia\facebooklinkpreview;
 
 include_once "HighLight.php";
 

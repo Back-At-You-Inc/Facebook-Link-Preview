@@ -8,6 +8,7 @@
  */
 
 /** This class handles the content analysis */
+namespace baymedia\facebooklinkpreview;
 
 include_once "Regex.php";
 

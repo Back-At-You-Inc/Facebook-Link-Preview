@@ -8,6 +8,7 @@
  */
 
 /** This class sets the system configuration */
+namespace baymedia\facebooklinkpreview;
 
 class SetUp {
 

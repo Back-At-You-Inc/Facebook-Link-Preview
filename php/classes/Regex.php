@@ -6,6 +6,7 @@
  *
  * Version: 1.3.0
  */
+ namespace baymedia\facebooklinkpreview;
 
 class Regex {
 

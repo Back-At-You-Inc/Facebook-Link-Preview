@@ -10,6 +10,8 @@
 /**
  *  This class mounts the iframe embed code for the video services below
  * */
+ namespace baymedia\facebooklinkpreview;
+ 
 class Media
 {
 

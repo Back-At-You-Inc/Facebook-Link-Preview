@@ -8,6 +8,7 @@
  */
 
 /** This class contains some json fix static functions */
+namespace baymedia\facebooklinkpreview;
 
 class Json {
 
