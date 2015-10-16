@@ -12,10 +12,8 @@
     ],
     "require": {
     },
-	"autoload": {
-        "psr-4": {
-            "baymedia\\facebooklinkpreview\\": "php/classes/"
-        }
+    "autoload": {
+        "classmap": ["php/classes/"]
     },
     "repositories": [
         {
