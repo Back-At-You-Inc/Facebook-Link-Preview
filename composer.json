@@ -13,13 +13,11 @@
     "require": {
     },
     "autoload": {
-        "psr-4": {
-            "FBLinkPreview\\": "php/classes"
-        }
+        "classmap": ["php/classes"]
     },
     "repositories": [
         {
-            "type": "git",
+            "type": "vcs",
     	    "url": "https://github.com/accounts-bay/Facebook-Link-Preview"
         }
     ]
