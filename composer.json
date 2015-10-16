@@ -1,0 +1,21 @@
+{
+    "name": "accounts-bay/facebook-link-preview",
+    "description": "Facebook-Like Link Preview",
+    "type": "library",
+    "keywords": ["facebook","link","preview"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Back at You Media",
+            "email": "dev@backatyou.com"
+        }
+    ],
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "FBLinkPreview\\": "php/classes"
+        }
+    }
+}
+
