@@ -107,7 +107,7 @@ class LinkPreview
                 $media = $this->getMedia($pageUrl);
                 if(count($media) == 0) {
                 	foreach($metaTags['images'] as $metaImage) {
-                		$images[] = !preg_match(LpRegex::$httpRegex, $metaImage) ? LpUrl::canonicalLink(LpContent::extendedTrim($metaImage), $pageUrl) : $metaImage;
+                		$images[] = !preg_match(Regex::$httpRegex, $metaImage) ? Url::canonicalLink(Content::extendedTrim($metaImage), $pageUrl) : $metaImage;
                 	}
                 }
                 else {

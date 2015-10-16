@@ -80,7 +80,7 @@ class Content
         }
 
 		// get all full image urls from anywhere on the page
-        if (preg_match_all(LpRegex::$urlRegex, $text, $matching)) {
+        if (preg_match_all(Regex::$urlRegex, $text, $matching)) {
         	for ($i = 0; $i < count($matching[0]); $i++) {
         		if(self::isImage($matching[0][$i])) {
 					$content[] = $matching[0][$i];
