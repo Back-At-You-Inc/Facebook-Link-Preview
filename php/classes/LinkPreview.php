@@ -112,8 +112,8 @@ class LinkPreview
                 }
                 else {
                 	$images[] = $media[0];
+					$videoIframe = $media[1];
                 }
-                $videoIframe = $media[1];
 
                 $images = array_merge($images, Content::getImages($raw, $pageUrl, $imageQuantity));
                 if ($media != null && $media[0] != "" && $media[1] != "")
