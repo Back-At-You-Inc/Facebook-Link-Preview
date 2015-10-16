@@ -18,10 +18,7 @@ include_once "Json.php";
 
 class LinkPreview
 {
-
-    function __construct()
-    {
-    }
+    function __construct(){}
 
     function joinAll($matching, $number, $url, $content)
     {
@@ -44,9 +41,7 @@ class LinkPreview
 
     function crawl($text, $imageQuantity, $header)
     {
-
         if (preg_match(Regex::$urlRegex, $text, $match)) {
-
             $title = "";
             $description = "";
             $videoIframe = "";
@@ -58,6 +53,7 @@ class LinkPreview
             $finalUrl = $match[0];
             $pageUrl = str_replace("https://", "http://", $finalUrl);
 
+			$images = [];
             if (Content::isImage($pageUrl)) {
                 $images = $pageUrl;
             } else {
@@ -109,11 +105,17 @@ class LinkPreview
                 }
 
                 $media = $this->getMedia($pageUrl);
-                $images = count($media) == 0 ? Content::extendedTrim($metaTags["image"]) : $media[0];
+                if(count($media) == 0) {
+                	foreach($metaTags['images'] as $metaImage) {
+                		$images[] = !preg_match(LpRegex::$httpRegex, $metaImage) ? LpUrl::canonicalLink(LpContent::extendedTrim($metaImage), $pageUrl) : $metaImage;
+                	}
+                }
+                else {
+                	$images[] = $media[0];
+                }
                 $videoIframe = $media[1];
 
-                if ($images == "")
-                    $images = Content::getImages($raw, $pageUrl, $imageQuantity);
+                $images = array_merge($images, Content::getImages($raw, $pageUrl, $imageQuantity));
                 if ($media != null && $media[0] != "" && $media[1] != "")
                     $video = "yes";
 
@@ -122,7 +124,6 @@ class LinkPreview
                 $description = Content::extendedTrim($description);
 
                 $description = preg_replace(Regex::$scriptRegex, "", $description);
-
             }
 
             $finalLink = explode("&", $finalUrl);
@@ -154,10 +155,8 @@ class LinkPreview
 
                 return Json::jsonSafe($answer, $header);
             } else {
-
                 return $result_json;
             }
-
         }
         return null;
     }
@@ -168,7 +167,7 @@ class LinkPreview
         $options = array(CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => false, // do not return headers
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
-            CURLOPT_USERAGENT => "leocardz", // who am i
+            CURLOPT_USERAGENT => "leocardz", // who am i TODO: determine if a real one helps anything here (e.g. "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36")
             CURLOPT_AUTOREFERER => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response
@@ -212,5 +211,5 @@ class LinkPreview
         }
         return $media;
     }
-
 }
+?>

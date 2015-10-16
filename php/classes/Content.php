@@ -13,7 +13,6 @@ include_once "Regex.php";
 
 class Content
 {
-
     static function crawlCode($text)
     {
         $contentSpan = Content::getTagContent("span", $text);
@@ -59,6 +58,7 @@ class Content
     static function getImages($text, $url, $imageQuantity)
     {
         $content = array();
+		// get all images from img src
         if (preg_match_all(Regex::$imageRegex, $text, $matching)) {
 
             for ($i = 0; $i < count($matching[0]); $i++) {
@@ -79,35 +79,40 @@ class Content
             }
         }
 
+		// get all full image urls from anywhere on the page
+        if (preg_match_all(LpRegex::$urlRegex, $text, $matching)) {
+        	for ($i = 0; $i < count($matching[0]); $i++) {
+        		if(self::isImage($matching[0][$i])) {
+					$content[] = $matching[0][$i];
+        		}
+        	}
+        }
+		
         $content = array_unique($content);
         $content = array_values($content);
 
         $maxImages = $imageQuantity != -1 && $imageQuantity < count($content) ? $imageQuantity : count($content);
 
-        $images = "";
+        $images = array();
         for ($i = 0; $i < count($content); $i++) {
-            if (!($size = @getimagesize($content[$i]))) {
-                continue;
-            }
-            $size = getimagesize($content[$i]);
-            if ($size[0] > 40 && $size[1] > 15) {// avoids getting very small images
-                $images .= $content[$i] . "|";
+            $size = @getimagesize($content[$i]);
+            if($size === false) continue;
+            if ($size[0] > 64 && $size[1] > 64) {// avoids getting very small images
+                $images[] = $content[$i];
                 $maxImages--;
                 if ($maxImages == 0)
                     break;
             }
         }
 
-        return substr($images, 0, -1);
+        return $images;
     }
 
     static function getMetaTags($contents)
     {
-
         $result = false;
 
         if (isset($contents)) {
-
             $list = array(
                 "UTF-8",
                 "EUC-CN",
@@ -124,7 +129,6 @@ class Content
 
             $metaTags = Content::getMetaTagsEncoding($contents, $encoding);
 
-
             $result = $metaTags;
         }
 
@@ -134,7 +138,7 @@ class Content
     static function getMetaTagsEncoding($contents, $encoding)
     {
         $result = false;
-        $metaTags = array("url" => "", "title" => "", "description" => "", "image" => "");
+        $metaTags = array("url" => "", "title" => "", "description" => "", "images" => array());
 
         if (isset($contents)) {
 
@@ -152,7 +156,7 @@ class Content
                 if ($meta->getAttribute('property') == 'og:title')
                     $metaTags["title"] = $meta->getAttribute('content');
                 if ($meta->getAttribute('property') == 'og:image')
-                    $metaTags["image"] = $meta->getAttribute('content');
+                    $metaTags["images"][] = $meta->getAttribute('content');
                 if ($meta->getAttribute('property') == 'og:description')
                     $metaTags["og_description"] = $meta->getAttribute('content');
                 if ($meta->getAttribute('property') == 'og:url')
@@ -200,3 +204,4 @@ class Content
         return $content;
     }
 }
+?>

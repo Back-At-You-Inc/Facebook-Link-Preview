@@ -9,15 +9,18 @@
 
 /** This class handles url analysis */
 
-class Url {
-
+class Url
+{
     static function canonicalLink($imgSrc, $referrer) {
-        if (strpos($imgSrc, "//") === 0)
+        if (strpos($imgSrc, "//") === 0) {
             $imgSrc = "http:" . $imgSrc;
-        else if (strpos($imgSrc, "/") === 0)
-            $imgSrc = "http://" . Url::canonicalPage($referrer) . $imgSrc;
-        else
-            $imgSrc = "http://" . Url::canonicalPage($referrer) . '/' . $imgSrc;
+		}
+        else if (strpos($imgSrc, "/") === 0) {
+            $imgSrc = self::canonicalPage($referrer) . $imgSrc;
+		}
+        else {
+            $imgSrc = self::canonicalPage($referrer) . '/' . $imgSrc;
+		}
         return $imgSrc;
     }
 
@@ -51,10 +54,15 @@ class Url {
         if (substr_count($url, 'http://') > 1 || substr_count($url, 'https://') > 1 || (strpos($url, 'http://') !== false && strpos($url, 'https://') !== false))
             return $url;
 
-        if (strpos($url, "http://") !== false)
+        $protocol = "";
+        if (strpos($url, "http://") !== false) {
             $url = substr($url, 7);
-        else if (strpos($url, "https://") !== false)
+            $protocol = "http://";
+        }
+        else if (strpos($url, "https://") !== false) {
             $url = substr($url, 8);
+            $protocol = "https://";
+        }
 
         for ($i = 0; $i < strlen($url); $i++) {
             if ($url[$i] != "/")
@@ -63,7 +71,7 @@ class Url {
                 break;
         }
 
-        return $canonical;
+        return $protocol . $canonical;
     }
 
     static function getImageUrl($pathCounter, $url) {
@@ -79,3 +87,4 @@ class Url {
         return $src;
     }
 }
+?>
