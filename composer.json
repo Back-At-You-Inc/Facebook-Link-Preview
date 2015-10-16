@@ -17,7 +17,7 @@
             "FBLinkPreview\\": "php/classes"
         }
     },
-    "respositories": [
+    "repositories": [
         {
             "type": "git",
     	    "url": "https://github.com/accounts-bay/Facebook-Link-Preview"
