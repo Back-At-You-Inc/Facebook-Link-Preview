@@ -1,5 +1,5 @@
 {
-    "name": "accounts-bay/facebook-link-preview",
+    "name": "baymedia/facebook-link-preview",
     "description": "Facebook-Like Link Preview",
     "type": "library",
     "keywords": ["facebook","link","preview"],
@@ -12,8 +12,10 @@
     ],
     "require": {
     },
-    "autoload": {
-        "classmap": ["php/classes/"]
+	"autoload": {
+        "psr-4": {
+            "baymedia\\facebooklinkpreview\\": "php/classes/"
+        }
     },
     "repositories": [
         {
