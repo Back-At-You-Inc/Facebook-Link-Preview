@@ -143,7 +143,7 @@ class Content
 
         if (isset($contents)) {
 
-            $doc = new DOMDocument('1.0', 'utf-8');
+            $doc = new \DOMDocument('1.0', 'utf-8');
             @$doc->loadHTML($contents);
 
             $metas = $doc->getElementsByTagName('meta');
