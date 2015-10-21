@@ -30,7 +30,7 @@ class Content
 
     static function getTagContent($tag, $string)
     {
-        $pattern = "/<$tag(.*?)>(.*?)<\/$tag>/i";
+        $pattern = "/<$tag(.*?)>(.*?)<\/$tag>/is";
 
         preg_match_all($pattern, $string, $matches);
         $content = "";
@@ -41,9 +41,11 @@ class Content
                 break;
             }
         }
-        if ($content == "") {
+        if ($content == "") {// if no long enough string was found
             preg_match($pattern, $string, $matches);
-            $content = $matches[0];
+            if(isset($matches[0])) {// just use the first thing found, if anything
+            	$content = $matches[0];
+            }
         }
         return str_replace("&nbsp;", "", $content);
     }
