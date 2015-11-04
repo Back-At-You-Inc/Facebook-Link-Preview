@@ -172,7 +172,9 @@ class Content
 
             if (empty($metaTags["title"])) {
                 $nodes = $doc->getElementsByTagName('title');
-                $metaTags["title"] = $nodes->item(0)->nodeValue;
+				if($nodes->length > 0) {
+					$metaTags["title"] = $nodes->item(0)->nodeValue;
+				}
             }
 
             $result = $metaTags;
