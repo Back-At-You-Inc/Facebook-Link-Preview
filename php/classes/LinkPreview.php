@@ -168,11 +168,12 @@ class LinkPreview
         $options = array(CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => false, // do not return headers
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
-            CURLOPT_USERAGENT => "leocardz", // who am i TODO: determine if a real one helps anything here (e.g. "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36")
+            CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
             CURLOPT_AUTOREFERER => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
+            CURLOPT_ENCODING => ""// sets "Accept-Encoding: " header to all supported encoding types
         );
         $ch = curl_init($url);
         curl_setopt_array($ch, $options);
