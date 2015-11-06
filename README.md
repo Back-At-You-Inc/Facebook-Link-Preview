@@ -1,5 +1,12 @@
-Facebook-Like Link Preview
+Facebook-Like Link Preview (no longer maintained)
 ==========================
+
+<b>
+Disclaimer: I will no longer maintain this project because it's an old code and hard to maintain, but I'm exporting this logic
+to Angularjs and Bootstrap. I believe this a great solution for an easy comprehension of the code and will allow the project
+to evolve even further. You can found this new project here >> https://github.com/LeonardoCardoso/Link-Preview
+</b>
+
 
 [![Build Status](https://travis-ci.org/LeonardoCardoso/Facebook-Link-Preview.svg)](https://travis-ci.org/LeonardoCardoso/Facebook-Link-Preview)
 
@@ -23,7 +30,7 @@ For mode details, visit http://lab.leocardz.com/facebook-link-preview-php--jquer
 - Apache (must support mod_php)
 
 
-## How to added to your project
+## How to add it to your project
 
 1 &bull; Scripts
 
