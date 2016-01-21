@@ -48,10 +48,10 @@ class LinkPreview
             $videoIframe = "";
             $video = "no";
 
-            if (strpos($match[0], " ") === 0)
-                $match[0] = "http://" . substr($match[0], 1);
+            //if (strpos($match[0], " ") === 0)
+            //    $match[0] = "http://" . substr($match[0], 1);
 
-            $finalUrl = $match[0];
+            $finalUrl = $text;
             $pageUrl = str_replace("https://", "http://", $finalUrl);
 
 			$images = [];
@@ -165,7 +165,8 @@ class LinkPreview
     function getPage($url)
     {
         $res = array();
-        $options = array(CURLOPT_RETURNTRANSFER => true, // return web page
+        $options = array(
+			CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => false, // do not return headers
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
             CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
