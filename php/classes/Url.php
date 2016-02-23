@@ -79,7 +79,7 @@ class Url
         $src = "";
         if ($pathCounter > 0) {
             $urlBreaker = explode('/', $url);
-            for ($j = 0; $j < $pathCounter + 1; $j++) {
+            for ($j = 0; $j < $pathCounter; $j++) {
                 $src .= $urlBreaker[$j] . '/';
             }
         } else {
