@@ -56,7 +56,7 @@ class LinkPreview
 
 			$images = [];
             if (Content::isImage($pageUrl)) {
-                $images = $pageUrl;
+                $images[] = $pageUrl;
             } else {
                 $urlData = $this->getPage($pageUrl);
                 if (!$urlData["content"] && strpos($pageUrl, "//www.") === false) {
