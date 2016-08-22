@@ -117,6 +117,7 @@ class LinkPreview
                 }
 
                 $images = array_merge($images, Content::getImages($raw, $pageUrl, $imageQuantity));
+				$images = array_keys(array_flip($images));// filter out duplicate image urls
                 if ($media != null && $media[0] != "" && $media[1] != "")
                     $video = "yes";
 
