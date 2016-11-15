@@ -20,8 +20,8 @@ class Media
         $media = array();
         if (preg_match("/(.*?)v=(.*?)($|&)/i", $url, $matching)) {
             $vid = $matching[2];
-            array_push($media, "http://i2.ytimg.com/vi/$vid/hqdefault.jpg");
-            array_push($media, '<iframe id="' . date("YmdHis") . $vid . '" width="472" height="246" src="http://www.youtube.com/embed/' . $vid . '" frameborder="0" allowfullscreen></iframe>');
+            array_push($media, "https://i2.ytimg.com/vi/$vid/hqdefault.jpg");
+            array_push($media, '<iframe id="' . date("YmdHis") . $vid . '" width="472" height="246" src="https://www.youtube.com/embed/' . $vid . '" frameborder="0" allowfullscreen></iframe>');
         } else {
             array_push($media, "", "");
         }
@@ -64,7 +64,7 @@ class Media
             $imgId = $breakUrl[1];
             $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$imgId.php"));
             array_push($media, $hash[0]['thumbnail_large']);
-            array_push($media, '<iframe id="' . date("YmdHis") . $imgId . '" width="472" height="280" src="http://player.vimeo.com/video/' . $imgId . '" width="472" height="246" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen ></iframe>');
+            array_push($media, '<iframe id="' . date("YmdHis") . $imgId . '" width="472" height="280" src="https://player.vimeo.com/video/' . $imgId . '" width="472" height="246" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen ></iframe>');
         } else {
             array_push($media, "", "");
         }
@@ -79,8 +79,8 @@ class Media
         if ($matching[1] != "") {
             $vid = $matching[1];
             $vtitle = trim($matching[2], "/");
-            array_push($media, "http://s4.mcstatic.com/thumb/{$vid}/0/6/videos/0/6/{$vtitle}.jpg");
-            array_push($media, '<iframe id="' . date("YmdHis") . $vid . '" width="472" height="246" src="http://www.metacafe.com/embed/' . $vid . '" allowFullScreen frameborder=0></iframe>');
+            array_push($media, "https://s4.mcstatic.com/thumb/{$vid}/0/6/videos/0/6/{$vtitle}.jpg");
+            array_push($media, '<iframe id="' . date("YmdHis") . $vid . '" width="472" height="246" src="https://www.metacafe.com/embed/' . $vid . '" allowFullScreen frameborder=0></iframe>');
         } else {
             array_push($media, "", "");
         }
@@ -97,8 +97,8 @@ class Media
             //$hash=json_decode($hash,true);
             //array_push($media, $hash['thumbnail_url']);
 
-            array_push($media, "http://www.dailymotion.com/thumbnail/160x120/video/$id");
-            array_push($media, '<iframe id="' . date("YmdHis") . $id . '" width="472" height="246" src="http://www.dailymotion.com/embed/video/' . $id . '" allowFullScreen frameborder=0></iframe>');
+            array_push($media, "https://www.dailymotion.com/thumbnail/160x120/video/$id");
+            array_push($media, '<iframe id="' . date("YmdHis") . $id . '" width="472" height="246" src="https://www.dailymotion.com/embed/video/' . $id . '" allowFullScreen frameborder=0></iframe>');
         } else {
             array_push($media, "", "");
         }
@@ -115,7 +115,7 @@ class Media
             $hash = file_get_contents("http://www.collegehumor.com/oembed.json?url=http://www.dailymotion.com/embed/video/$id");
             $hash = json_decode($hash, true);
             array_push($media, $hash['thumbnail_url']);
-            array_push($media, '<iframe id="' . date("YmdHis") . $id . '" width="472" height="246" src="http://www.collegehumor.com/e/' . $id . '" allowFullScreen frameborder=0></iframe>');
+            array_push($media, '<iframe id="' . date("YmdHis") . $id . '" width="472" height="246" src="https://www.collegehumor.com/e/' . $id . '" allowFullScreen frameborder=0></iframe>');
         } else {
             array_push($media, "", "");
         }
