@@ -105,7 +105,7 @@ class LinkPreview
                     $description = "";
                 }
 
-                $media = $this->getMedia($pageUrl);
+                $media = self::getMedia($pageUrl);
                 if(count($media) == 0) {
                 	foreach($metaTags['images'] as $metaImage) {
                 		$images[] = !preg_match(Regex::$httpRegex, $metaImage) ? Url::canonicalLink(Content::extendedTrim($metaImage), $pageUrl) : $metaImage;
@@ -193,7 +193,7 @@ class LinkPreview
         return $res;
     }
 
-    function getMedia($pageUrl)
+    public static function getMedia($pageUrl)
     {
         $media = array();
         if (strpos($pageUrl, "youtube.com") !== false) {
