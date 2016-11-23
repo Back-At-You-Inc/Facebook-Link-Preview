@@ -54,6 +54,7 @@ class LinkPreview
             $finalUrl = $text;
             $pageUrl = str_replace("https://", "http://", $finalUrl);
 
+
 			$images = [];
             if (Content::isImage($pageUrl)) {
                 $images[] = $pageUrl;
@@ -71,6 +72,7 @@ class LinkPreview
                 $pageUrl = $finalUrl = $urlData["url"];
                 $raw = $urlData["content"];
                 $header = $urlData["header"];
+		$headers = $urlData["headers"];
 
                 $metaTags = Content::getMetaTags($raw);
 
@@ -133,8 +135,12 @@ class LinkPreview
 
             $description = strip_tags($description);
 
+            $can_brand = true;
+            if (isset($headers["x-frame-options"]) && $headers["x-frame-options"] == "SAMEORIGIN")
+            	$can_brand = false;
+
             $answer = array("title" => $title, "url" => $finalLink, "pageUrl" => $finalUrl, "canonicalUrl" => Url::canonicalPage($pageUrl), "description" => $description,
-                "images" => $images, "video" => $video, "videoIframe" => $videoIframe);
+                "images" => $images, "video" => $video, "videoIframe" => $videoIframe, "canBrand" => $can_brand);
 
             $result_json = Json::jsonSafe($answer, $header);
             $result_json_decoded = json_decode($result_json);
@@ -153,7 +159,7 @@ class LinkPreview
 
             if ($flagged) {
                 $answer = array("title" => $title, "url" => $finalLink, "pageUrl" => $finalUrl, "canonicalUrl" => Url::canonicalPage($pageUrl), "description" => $description,
-                    "images" => $images, "video" => $video, "videoIframe" => $videoIframe);
+                    "images" => $images, "video" => $video, "videoIframe" => $videoIframe, "canBrand" => $can_brand);
 
                 return Json::jsonSafe($answer, $header);
             } else {
@@ -165,17 +171,18 @@ class LinkPreview
 
     function getPage($url)
     {
+
         $res = array();
         $options = array(
 			CURLOPT_RETURNTRANSFER => true, // return web page
-            CURLOPT_HEADER => false, // do not return headers
+            CURLOPT_HEADER => true, // return headers
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
             CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
             CURLOPT_AUTOREFERER => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-            CURLOPT_ENCODING => ""// sets "Accept-Encoding: " header to all supported encoding types
+            CURLOPT_ENCODING => "utf-8"// sets "Accept-Encoding: " header to all supported encoding types
         );
         $ch = curl_init($url);
         curl_setopt_array($ch, $options);
@@ -183,13 +190,25 @@ class LinkPreview
         $header = curl_getinfo($ch);
         curl_close($ch);
 
+        $curlHeaderSize=$header['header_size'];
+	$body = trim(mb_substr($content, $curlHeaderSize));
+	$ResponseHeader = explode("\n",trim(mb_substr($content, 0, $curlHeaderSize)));
+	unset($ResponseHeader[0]);
+	$aHeaders = array();
+	foreach($ResponseHeader as $line){
+		if (strpos($line,':') != false) {
+  			list($key,$val) = explode(':',$line,2);
+			$aHeaders[strtolower($key)] = trim($val);
+		}
+	}
+
         $hrd = $header["content_type"];
         header("Content-Type: " . $hrd, true);
 
-        $res['content'] = $content;
+        $res['content'] = $body;
         $res['url'] = $header['url'];
         $res['header'] = $hrd;
-
+	$res['headers'] = $aHeaders;
         return $res;
     }
 
