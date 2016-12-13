@@ -54,7 +54,6 @@ class LinkPreview
             $finalUrl = $text;
             $pageUrl = str_replace("https://", "http://", $finalUrl);
 
-
 			$images = [];
             if (Content::isImage($pageUrl)) {
                 $images[] = $pageUrl;
@@ -72,7 +71,7 @@ class LinkPreview
                 $pageUrl = $finalUrl = $urlData["url"];
                 $raw = $urlData["content"];
                 $header = $urlData["header"];
-		$headers = $urlData["headers"];
+				$headers = $urlData["headers"];
 
                 $metaTags = Content::getMetaTags($raw);
 
@@ -171,7 +170,6 @@ class LinkPreview
 
     function getPage($url)
     {
-
         $res = array();
         $options = array(
 			CURLOPT_RETURNTRANSFER => true, // return web page
@@ -191,16 +189,16 @@ class LinkPreview
         curl_close($ch);
 
         $curlHeaderSize=$header['header_size'];
-	$body = trim(mb_substr($content, $curlHeaderSize));
-	$ResponseHeader = explode("\n",trim(mb_substr($content, 0, $curlHeaderSize)));
-	unset($ResponseHeader[0]);
-	$aHeaders = array();
-	foreach($ResponseHeader as $line){
-		if (strpos($line,':') != false) {
-  			list($key,$val) = explode(':',$line,2);
-			$aHeaders[strtolower($key)] = trim($val);
+		$body = trim(mb_substr($content, $curlHeaderSize));
+		$ResponseHeader = explode("\n",trim(mb_substr($content, 0, $curlHeaderSize)));
+		unset($ResponseHeader[0]);
+		$aHeaders = array();
+		foreach($ResponseHeader as $line){
+			if (strpos($line,':') != false) {
+				list($key,$val) = explode(':',$line,2);
+				$aHeaders[strtolower($key)] = trim($val);
+			}
 		}
-	}
 
         $hrd = $header["content_type"];
         header("Content-Type: " . $hrd, true);
@@ -208,7 +206,7 @@ class LinkPreview
         $res['content'] = $body;
         $res['url'] = $header['url'];
         $res['header'] = $hrd;
-	$res['headers'] = $aHeaders;
+		$res['headers'] = $aHeaders;
         return $res;
     }
 

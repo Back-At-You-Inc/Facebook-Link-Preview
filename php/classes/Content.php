@@ -11,6 +11,7 @@
 namespace baymedia\facebooklinkpreview;
 
 include_once "Regex.php";
+include_once "FastImage.php";
 
 class Content
 {
@@ -98,14 +99,18 @@ class Content
 
         $images = array();
         for ($i = 0; $i < count($content); $i++) {
-            $size = @getimagesize($content[$i]);
-            if($size === false) continue;
-            if ($size[0] > 64 && $size[1] > 64) {// avoids getting very small images
-                $images[] = $content[$i];
-                $maxImages--;
-                if ($maxImages == 0)
-                    break;
-            }
+        	try {
+        		$image = new FastImage($content[$i]);
+        		list($width, $height) = $image->getSize();
+        		if($width > 120 && $height > 120) {// avoids getting very small images
+        			$images[] = $content[$i];
+        			$maxImages--;
+        			if ($maxImages == 0)
+        				break;
+        		}
+        	} catch(\Exception $ex) {
+        		error_log("Skipping $content[$i]");
+        	}// skip images that can't be fetched
         }
 
         return $images;
@@ -158,7 +163,7 @@ class Content
                     $metaTags["keywords"] = $meta->getAttribute('content');
                 if ($meta->getAttribute('property') == 'og:title')
                     $metaTags["title"] = $meta->getAttribute('content');
-                if ($meta->getAttribute('property') == 'og:image')
+                if ($meta->getAttribute('property') === 'og:image' || $meta->getAttribute('name') === 'og:image')
                     $metaTags["images"][] = $meta->getAttribute('content');
                 if ($meta->getAttribute('property') == 'og:description')
                     $metaTags["og_description"] = $meta->getAttribute('content');
