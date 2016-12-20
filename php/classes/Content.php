@@ -108,9 +108,7 @@ class Content
         			if ($maxImages == 0)
         				break;
         		}
-        	} catch(\Exception $ex) {
-        		error_log("Skipping $content[$i]");
-        	}// skip images that can't be fetched
+        	} catch(\Exception $ex) {}// skip images that can't be fetched
         }
 
         return $images;
