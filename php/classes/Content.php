@@ -97,8 +97,17 @@ class Content
 
         $maxImages = $imageQuantity != -1 && $imageQuantity < count($content) ? $imageQuantity : count($content);
 
+        $exclude_paths = ["bay_files.s3.amazonaws.com", "www.homeforsale.at"];
         $images = array();
         for ($i = 0; $i < count($content); $i++) {
+        	$excluded = false;
+        	foreach($exclude_paths as $path) {
+        		if(strpos($content[$i], $path) !== false) {
+        			$excluded = true;
+        			break;
+        		}
+        	}
+        	if($excluded) continue;
         	try {
         		$image = new FastImage($content[$i]);
         		list($width, $height) = $image->getSize();
