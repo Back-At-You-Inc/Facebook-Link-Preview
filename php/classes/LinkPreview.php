@@ -201,7 +201,7 @@ class LinkPreview
 		}
 
         $hrd = $header["content_type"];
-        header("Content-Type: " . $hrd, true);
+        //header("Content-Type: " . $hrd, true);
 
         $res['content'] = $body;
         $res['url'] = $header['url'];
