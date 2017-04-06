@@ -136,7 +136,10 @@ class LinkPreview
 
             $can_brand = true;
             if (isset($headers["x-frame-options"]) && $headers["x-frame-options"] == "SAMEORIGIN")
-            	$can_brand = false;
+		$can_brand = false;
+
+	if(strstr($finalLink, "vimeo.com"))
+		$can_brand = false;
 
             $answer = array("title" => $title, "url" => $finalLink, "pageUrl" => $finalUrl, "canonicalUrl" => Url::canonicalPage($pageUrl), "description" => $description,
                 "images" => $images, "video" => $video, "videoIframe" => $videoIframe, "canBrand" => $can_brand);
