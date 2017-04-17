@@ -135,11 +135,10 @@ class LinkPreview
             $description = strip_tags($description);
 
             $can_brand = true;
-            if (isset($headers["x-frame-options"]) && $headers["x-frame-options"] == "SAMEORIGIN")
-		$can_brand = false;
-
-	if(strstr($finalLink, "vimeo.com"))
-		$can_brand = false;
+            if (isset($headers["x-frame-options"]) && $headers["x-frame-options"] === "SAMEORIGIN")
+				$can_brand = false;
+			else if(strstr($finalLink, "vimeo.com") || strstr($finalLink, "realtor.com"))
+				$can_brand = false;
 
             $answer = array("title" => $title, "url" => $finalLink, "pageUrl" => $finalUrl, "canonicalUrl" => Url::canonicalPage($pageUrl), "description" => $description,
                 "images" => $images, "video" => $video, "videoIframe" => $videoIframe, "canBrand" => $can_brand);
@@ -183,7 +182,8 @@ class LinkPreview
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response
             CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-            CURLOPT_ENCODING => "utf-8"// sets "Accept-Encoding: " header to all supported encoding types
+            CURLOPT_ENCODING => "utf-8",// sets "Accept-Encoding: " header to all supported encoding types
+			CURLOPT_REFERER => "https://www.backatyou.com"// set Referer: header
         );
         $ch = curl_init($url);
         curl_setopt_array($ch, $options);
