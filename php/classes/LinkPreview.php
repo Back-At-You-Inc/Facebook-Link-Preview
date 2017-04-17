@@ -216,7 +216,7 @@ class LinkPreview
     public static function getMedia($pageUrl)
     {
         $media = array();
-        if (strpos($pageUrl, "youtube.com") !== false) {
+        if (strpos($pageUrl, "youtube.com") !== false || strpos($pageUrl, "youtu.be") !== false) {
             $media = Media::mediaYoutube($pageUrl);
         } else if (strpos($pageUrl, "vimeo.com") !== false) {
             $media = Media::mediaVimeo($pageUrl);
