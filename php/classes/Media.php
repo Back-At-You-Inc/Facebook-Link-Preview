@@ -18,8 +18,8 @@ class Media
     static function mediaYoutube($url)
     {
         $media = array();
-        if (preg_match("/(.*?)v=(.*?)($|&)/i", $url, $matching)) {
-            $vid = $matching[2];
+        if (preg_match("/((youtube\.com\/watch\?v=)|(youtu.be\/))([a-zA-Z0-9\-_]+)(&.*)?/", $url, $matching)) {
+            $vid = $matching[4];
             array_push($media, "https://i2.ytimg.com/vi/$vid/hqdefault.jpg");
             array_push($media, '<iframe id="' . date("YmdHis") . $vid . '" width="472" height="246" src="https://www.youtube.com/embed/' . $vid . '" frameborder="0" allowfullscreen></iframe>');
         } else {
