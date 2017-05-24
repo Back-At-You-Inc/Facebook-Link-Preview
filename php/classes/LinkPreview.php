@@ -135,7 +135,7 @@ class LinkPreview
             $description = strip_tags($description);
 
             $can_brand = true;
-            if (isset($headers["x-frame-options"]) && $headers["x-frame-options"] === "SAMEORIGIN")
+            if (isset($headers["x-frame-options"]))
 				$can_brand = false;
 			else if(strstr($finalLink, "vimeo.com") || strstr($finalLink, "realtor.com"))
 				$can_brand = false;
