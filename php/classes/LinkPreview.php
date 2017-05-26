@@ -135,10 +135,11 @@ class LinkPreview
             $description = strip_tags($description);
 
             $can_brand = true;
-            if (isset($headers["x-frame-options"]))
+            if (isset($headers['x-frame-options']) && (stripos($headers['x-frame-options'], "allow-from") === false || stripos($headers['x-frame-options'], "trendinghomenews.com") === false)) {
 				$can_brand = false;
-			else if(strstr($finalLink, "vimeo.com") || strstr($finalLink, "realtor.com"))
+            } else if(strstr($finalLink, "vimeo.com") || strstr($finalLink, "realtor.com")) {
 				$can_brand = false;
+            }
 
             $answer = array("title" => $title, "url" => $finalLink, "pageUrl" => $finalUrl, "canonicalUrl" => Url::canonicalPage($pageUrl), "description" => $description,
                 "images" => $images, "video" => $video, "videoIframe" => $videoIframe, "canBrand" => $can_brand);
