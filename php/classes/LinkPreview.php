@@ -111,16 +111,19 @@ class LinkPreview
                 	foreach($metaTags['images'] as $metaImage) {
                 		$images[] = !preg_match(Regex::$httpRegex, $metaImage) ? Url::canonicalLink(Content::extendedTrim($metaImage), $pageUrl) : $metaImage;
                 	}
-                }
-                else {
+                } else {
                 	$images[] = $media[0];
 					$videoIframe = $media[1];
                 }
-
-                $images = array_merge($images, Content::getImages($raw, $pageUrl, $imageQuantity));
-				$images = array_keys(array_flip($images));// filter out duplicate image urls
-                if ($media != null && $media[0] != "" && $media[1] != "")
+				if ($media != null && $media[0] != "" && $media[1] != "")
                     $video = "yes";
+
+				if($imageQuantity == 0) {
+					$images = [];
+				} else {
+					$images = array_merge($images, Content::getImages($raw, $pageUrl, $imageQuantity));
+					$images = array_keys(array_flip($images));// filter out duplicate image urls
+				}
 
                 $title = Content::extendedTrim($title);
                 $pageUrl = Content::extendedTrim($pageUrl);
