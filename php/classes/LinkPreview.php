@@ -178,6 +178,7 @@ class LinkPreview
     {
         $res = array();
         $options = array(
+			CURLOPT_SSL_VERIFYPEER => false,//FALSE to stop cURL from verifying the peer's certificate
 			CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => true, // return headers
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
