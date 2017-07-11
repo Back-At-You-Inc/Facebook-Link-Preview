@@ -140,6 +140,8 @@ class LinkPreview
             $can_brand = true;
             if (isset($headers['x-frame-options']) && (stripos($headers['x-frame-options'], "allow-from") === false || stripos($headers['x-frame-options'], "trendinghomenews.com") === false)) {
 				$can_brand = false;
+            } else if(isset($headers['content-security-policy']) && (stripos($headers['content-security-policy'], "frame-ancestors") !== false || stripos($headers['content-security-policy'], "child-src") !== false || stripos($headers['content-security-policy'], "frame-src") !== false) && stripos($headers['content-security-policy'], "trendinghomenews.com") === false) {
+				$can_brand = false;
             } else if(strstr($finalLink, "vimeo.com") || strstr($finalLink, "realtor.com")) {
 				$can_brand = false;
             }
