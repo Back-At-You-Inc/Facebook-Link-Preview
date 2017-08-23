@@ -142,7 +142,7 @@ class LinkPreview
 				$can_brand = false;
             } else if(isset($headers['content-security-policy']) && (stripos($headers['content-security-policy'], "frame-ancestors") !== false || stripos($headers['content-security-policy'], "child-src") !== false || stripos($headers['content-security-policy'], "frame-src") !== false) && stripos($headers['content-security-policy'], "trendinghomenews.com") === false) {
 				$can_brand = false;
-            } else if(strstr($finalLink, "vimeo.com") || strstr($finalLink, "realtor.com")) {
+            } else if(strstr($finalLink, "vimeo.com")) {
 				$can_brand = false;
             }
 
