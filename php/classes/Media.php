@@ -62,6 +62,9 @@ class Media
         $media = array();
         if ($breakUrl[1] != "") {
             $imgId = $breakUrl[1];
+			if(strpos($imgId, "?") !== false) {
+            	$imgId = explode("?", $imgId)[0];
+            }
             $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$imgId.php"));
             array_push($media, $hash[0]['thumbnail_large']);
             array_push($media, '<iframe id="' . date("YmdHis") . $imgId . '" width="472" height="280" src="https://player.vimeo.com/video/' . $imgId . '" width="472" height="246" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen ></iframe>');
