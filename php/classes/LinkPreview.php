@@ -175,7 +175,7 @@ class LinkPreview
 			CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => true, // return headers
             CURLOPT_FOLLOWLOCATION => true, // follow redirects
-            CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36",
+            CURLOPT_USERAGENT => "BAY-LinkPreviewer/1.0",
             CURLOPT_AUTOREFERER => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response
