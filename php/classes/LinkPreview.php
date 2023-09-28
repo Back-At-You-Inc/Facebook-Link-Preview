@@ -48,9 +48,6 @@ class LinkPreview
 			$videoIframe = "";
 			$video = "no";
 
-			//if (strpos($match[0], " ") === 0)
-			//	$match[0] = "http://" . substr($match[0], 1);
-
 			$finalUrl = $text;
 			$pageUrl = str_replace("https://", "http://", $finalUrl);
 
@@ -186,7 +183,7 @@ class LinkPreview
 			CURLOPT_RETURNTRANSFER => true, // return web page
 			CURLOPT_HEADER => true, // return headers
 			CURLOPT_FOLLOWLOCATION => true, // follow redirects
-			CURLOPT_USERAGENT => "BAY-LinkPreviewer/1.0",
+			CURLOPT_USERAGENT => "CurlBAYLinkPreviewer/1.0",
 			CURLOPT_AUTOREFERER => true, // set referer on redirect
 			CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
 			CURLOPT_TIMEOUT => 120, // timeout on response
