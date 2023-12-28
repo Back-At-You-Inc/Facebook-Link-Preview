@@ -7,7 +7,6 @@
  * Version: 1.3.0
  */
 
-/** Important php5-curl must be installed and enabled */
 namespace baymedia\facebooklinkpreview;
 
 include_once "Media.php";
@@ -19,84 +18,69 @@ include_once "Json.php";
 
 class LinkPreview
 {
-	function __construct(){}
+	private $user_agent;
 
-	function joinAll($matching, $number, $url, $content) {
-		for ($i = 0; $i < count($matching[$number]); $i++) {
-			$imgSrc = $matching[$number][$i] . $matching[$number + 1][$i];
-			$src = "";
-			$pathCounter = substr_count($imgSrc, "../");
-			if (!preg_match(Regex::$httpRegex, $imgSrc)) {
-				$src = Url::getImageUrl($pathCounter, Url::canonicalLink($imgSrc, $url));
-			}
-			if ($src . $imgSrc != $url) {
-				if ($src == "") {
-					array_push($content, $src . $imgSrc);
-				} else {
-					array_push($content, $src);
-				}
-			}
-		}
-		return $content;
+	public function __construct(array $options=[]){
+		$this->user_agent = $options['user-agent'] ?? null;
 	}
 
-	function crawl($text, $imageQuantity, $header) {
+	public function crawl(string $url, int $image_quantity) {
 		$match = [];
-		if (preg_match(Regex::$urlRegex, $text, $match)) {
+		if(preg_match(Regex::$urlRegex, $url, $match)) {
+			$header = "";
 			$title = "";
 			$description = "";
 			$videoIframe = "";
 			$video = "no";
 
-			$finalUrl = $text;
-			$pageUrl = str_replace("https://", "http://", $finalUrl);
+			$finalUrl = $url;
+			$page_url = str_replace("https://", "http://", $finalUrl);
 
 			$images = [];
-			if (Content::isImage($pageUrl)) {
-				$images[] = $pageUrl;
+			if(Content::isImage($page_url)) {
+				$images[] = $page_url;
 			} else {
-				$urlData = $this->getPage($pageUrl);
-				if (!$urlData["content"] && strpos($pageUrl, "//www.") === false) {
-					if (strpos($pageUrl, "http://") !== false) {
-						$pageUrl = str_replace("http://", "http://www.", $pageUrl);
-					} elseif (strpos($pageUrl, "https://") !== false) {
-						$pageUrl = str_replace("https://", "https://www.", $pageUrl);
-					}
+				$urlData = $this->getPage($page_url);
+				if(!$urlData['content']) {
+					if(strpos($page_url, "//www.") === false) {
+						if(strpos($page_url, "http://") !== false) {
+							$page_url = str_replace("http://", "http://www.", $page_url);
+						} else if(strpos($page_url, "https://") !== false) {
+							$page_url = str_replace("https://", "https://www.", $page_url);
+						}
 
-					$urlData = $this->getPage($pageUrl);
+						$urlData = $this->getPage($page_url);
+					}
+					if(!$urlData['content']) return null;
 				}
 
-				$pageUrl = $finalUrl = $urlData["url"];
-				$raw = $urlData["content"];
-				$header = $urlData["header"];
+				$page_url = $finalUrl = $urlData['url'];
+				$raw = $urlData['content'];
+				$header = $urlData['header'];
 
 				$metaTags = Content::getMetaTags($raw);
 
-				$tempTitle = Content::extendedTrim($metaTags["title"]);
-				if ($tempTitle != "") {
+				$tempTitle = Content::extendedTrim($metaTags['title']);
+				if($tempTitle !== "") {
 					$title = $tempTitle;
 				}
 
-				if ($title == "") {
+				if($title === "") {
 					$matching = [];
-					if (preg_match(Regex::$titleRegex, str_replace("\n", " ", $raw), $matching)) {
+					if(preg_match(Regex::$titleRegex, str_replace("\n", " ", $raw), $matching)) {
 						$title = $matching[2];
 					}
 				}
 
-				$tempDescription = Content::extendedTrim($metaTags["description"]);
-				if ($tempDescription != "") {
+				$tempDescription = Content::extendedTrim($metaTags['description']);
+				if($tempDescription != "") {
 					$description = $tempDescription;
 				} else {
 					$description = Content::crawlCode($raw);
 				}
 
-				$descriptionUnderstood = false;
-				if ($description != "") {
-					$descriptionUnderstood = true;
-				}
-
-				if (($descriptionUnderstood == false && strlen($title) > strlen($description) && !preg_match(Regex::$urlRegex, $description) && $description != "" && !preg_match('/[A-Z]/', $description)) || $title == $description) {
+				$descriptionUnderstood = $description !== "";
+				if(($descriptionUnderstood == false && strlen($title) > strlen($description) && !preg_match(Regex::$urlRegex, $description) && $description !== "" && !preg_match('/[A-Z]/', $description)) || $title === $description) {
 					$title = $description;
 					$description = Content::crawlCode($raw);
 				}
@@ -108,10 +92,10 @@ class LinkPreview
 					$description = "";
 				}
 
-				$media = self::getMedia($pageUrl);
+				$media = self::getMedia($page_url);
 				if(count($media) === 0) {
 					foreach($metaTags['images'] as $metaImage) {
-						$images[] = !preg_match(Regex::$httpRegex, $metaImage) ? Url::canonicalLink(Content::extendedTrim($metaImage), $pageUrl) : $metaImage;
+						$images[] = !preg_match(Regex::$httpRegex, $metaImage) ? Url::canonicalLink(Content::extendedTrim($metaImage), $page_url) : $metaImage;
 					}
 				} else if(count($media) === 2) {
 					if(!empty($media[0])) {
@@ -119,19 +103,19 @@ class LinkPreview
 					}
 					$videoIframe = $media[1];
 				}
-				if ($media != null && $media[0] != "" && $media[1] != "") {
+				if(!empty($media) && $media[0] !== "" && $media[1] !== "") {
 					$video = "yes";
 				}
 
-				if($imageQuantity == 0) {
+				if($image_quantity == 0) {
 					$images = [];
 				} else {
-					$images = array_merge($images, Content::getImages($raw, $pageUrl, $imageQuantity));
+					$images = array_merge($images, Content::getImages($raw, $page_url, $image_quantity));
 					$images = array_keys(array_flip($images));// filter out duplicate image urls
 				}
 
 				$title = Content::extendedTrim($title);
-				$pageUrl = Content::extendedTrim($pageUrl);
+				$page_url = Content::extendedTrim($page_url);
 				$description = Content::extendedTrim($description);
 
 				$description = preg_replace(Regex::$scriptRegex, "", $description);
@@ -143,14 +127,14 @@ class LinkPreview
 			$description = strip_tags($description);
 
 			$answer = [
-				"title" => $title,
-				"url" => $finalLink,
-				"pageUrl" => $finalUrl,
-				"canonicalUrl" => Url::canonicalPage($pageUrl),
-				"description" => $description,
-				"images" => $images,
-				"video" => $video,
-				"videoIframe" => $videoIframe
+				'title' => $title,
+				'url' => $finalLink,
+				'page_url' => $finalUrl,
+				'canonicalUrl' => Url::canonicalPage($page_url),
+				'description' => $description,
+				'images' => $images,
+				'video' => $video,
+				'videoIframe' => $videoIframe
 			];
 
 			$result_json = Json::jsonSafe($answer, $header);
@@ -158,17 +142,17 @@ class LinkPreview
 
 			$flagged = false;
 
-			if (!isset($result_json_decoded->title)) {
+			if(!isset($result_json_decoded->title)) {
 				$answer['title'] = utf8_encode($title);
 				$flagged = true;
 			}
 
-			if (!isset($result_json_decoded->description)) {
+			if(!isset($result_json_decoded->description)) {
 				$answer['description'] = utf8_encode($description);
 				$flagged = true;
 			}
 
-			if ($flagged) {
+			if($flagged) {
 				return Json::jsonSafe($answer, $header);
 			}
 			return $result_json;
@@ -176,20 +160,23 @@ class LinkPreview
 		return null;
 	}
 
-	function getPage($url) {
-		$res = [];
+	private function getPage($url) {
 		$options = [
 			CURLOPT_SSL_VERIFYPEER => false,//FALSE to stop cURL from verifying the peer's certificate
 			CURLOPT_RETURNTRANSFER => true, // return web page
 			CURLOPT_HEADER => true, // return headers
 			CURLOPT_FOLLOWLOCATION => true, // follow redirects
-			CURLOPT_USERAGENT => "CurlBAYLinkPreviewer/1.0",
+			CURLOPT_USERAGENT => $this->user_agent ?? "CurlBAYLinkPreviewer/1.0",
 			CURLOPT_AUTOREFERER => true, // set referer on redirect
-			CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
-			CURLOPT_TIMEOUT => 120, // timeout on response
+			CURLOPT_CONNECTTIMEOUT => 30, // timeout on connect
+			CURLOPT_TIMEOUT => 30, // timeout on response
 			CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-			CURLOPT_ENCODING => "utf-8",// sets "Accept-Encoding: " header to all supported encoding types
-			CURLOPT_REFERER => "https://www.backatyou.com"// set Referer: header
+			CURLOPT_ENCODING => "",// sets "Accept-Encoding: " header to all supported encoding types
+			CURLOPT_REFERER => "https://www.backatyou.com",// set Referer: header
+			CURLOPT_HTTPHEADER => [
+				"Accept-Language: *",
+				"Accept: */*"
+			]
 		];
 		$ch = curl_init($url);
 		curl_setopt_array($ch, $options);
@@ -197,46 +184,44 @@ class LinkPreview
 		$header = curl_getinfo($ch);
 		curl_close($ch);
 
-		$curlHeaderSize=$header['header_size'];
-		$body = trim(mb_substr($content, $curlHeaderSize));
-		$ResponseHeader = explode("\n",trim(mb_substr($content, 0, $curlHeaderSize)));
-		unset($ResponseHeader[0]);
+		$curl_header_size = $header['header_size'];
+		$body = trim(mb_substr($content, $curl_header_size));
+		$response_header = explode("\n",trim(mb_substr($content, 0, $curl_header_size)));
+		unset($response_header[0]);
 		$aHeaders = [];
-		foreach($ResponseHeader as $line){
+		foreach($response_header as $line){
 			if (strpos($line,':') != false) {
 				list($key,$val) = explode(':',$line,2);
 				$aHeaders[strtolower($key)] = trim($val);
 			}
 		}
 
-		$hrd = $header["content_type"];
-		//header("Content-Type: " . $hrd, true);
-
-		$res['content'] = $body;
-		$res['url'] = $header['url'];
-		$res['header'] = $hrd;
-		$res['headers'] = $aHeaders;
-		return $res;
+		return [
+			'content' => $body,
+			'url' => $header['url'],
+			'header' => $header['content_type'],
+			'headers' => $aHeaders
+		];
 	}
 
-	public static function getMedia($pageUrl) {
+	public static function getMedia($page_url) {
 		$media = [];
-		if (strpos($pageUrl, "youtube.com") !== false || strpos($pageUrl, "youtu.be") !== false) {
-			$media = Media::mediaYoutube($pageUrl);
-		} else if (strpos($pageUrl, "vimeo.com") !== false) {
-			$media = Media::mediaVimeo($pageUrl);
-		} else if (strpos($pageUrl, "vine.co") !== false) {
-			$media = Media::mediaVine($pageUrl);
-		} else if (strpos($pageUrl, "metacafe.com") !== false) {
-			$media = Media::mediaMetacafe($pageUrl);
-		} else if (strpos($pageUrl, "dailymotion.com") !== false) {
-			$media = Media::mediaDailymotion($pageUrl);
-		} else if (strpos($pageUrl, "collegehumor.com") !== false) {
-			$media = Media::mediaCollegehumor($pageUrl);
-		} else if (strpos($pageUrl, "blip.tv") !== false) {
-			$media = Media::mediaBlip($pageUrl);
-		} else if (strpos($pageUrl, "funnyordie.com") !== false) {
-			$media = Media::mediaFunnyordie($pageUrl);
+		if(strpos($page_url, "youtube.com") !== false || strpos($page_url, "youtu.be") !== false) {
+			$media = Media::mediaYoutube($page_url);
+		} else if(strpos($page_url, "vimeo.com") !== false) {
+			$media = Media::mediaVimeo($page_url);
+		} else if(strpos($page_url, "vine.co") !== false) {
+			$media = Media::mediaVine($page_url);
+		} else if(strpos($page_url, "metacafe.com") !== false) {
+			$media = Media::mediaMetacafe($page_url);
+		} else if(strpos($page_url, "dailymotion.com") !== false) {
+			$media = Media::mediaDailymotion($page_url);
+		} else if(strpos($page_url, "collegehumor.com") !== false) {
+			$media = Media::mediaCollegehumor($page_url);
+		} else if(strpos($page_url, "blip.tv") !== false) {
+			$media = Media::mediaBlip($page_url);
+		} else if(strpos($page_url, "funnyordie.com") !== false) {
+			$media = Media::mediaFunnyordie($page_url);
 		}
 		return $media;
 	}

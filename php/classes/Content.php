@@ -15,210 +15,197 @@ include_once "FastImage.php";
 
 class Content
 {
-    static function crawlCode($text)
-    {
-        $contentSpan = Content::getTagContent("span", $text);
-        $contentParagraph = Content::getTagContent("p", $text);
-        $contentDiv = Content::getTagContent("div", $text);
-        if (strlen($contentParagraph) > strlen($contentSpan) && strlen($contentParagraph) >= strlen($contentDiv))
-            $content = $contentParagraph;
-        else if (strlen($contentParagraph) > strlen($contentSpan) && strlen($contentParagraph) < strlen($contentDiv))
-            $content = $contentDiv;
-        else
-            $content = $contentParagraph;
-        return $content;
-    }
+	public static function crawlCode($text) {
+		$contentSpan = self::getTagContent("span", $text);
+		$contentParagraph = self::getTagContent("p", $text);
+		$contentDiv = self::getTagContent("div", $text);
+		if(strlen($contentParagraph) > strlen($contentSpan) && strlen($contentParagraph) >= strlen($contentDiv)) {
+			$content = $contentParagraph;
+		} else if(strlen($contentParagraph) > strlen($contentSpan) && strlen($contentParagraph) < strlen($contentDiv)) {
+			$content = $contentDiv;
+		} else {
+			$content = $contentParagraph;
+		}
+		return $content;
+	}
 
-    static function getTagContent($tag, $string)
-    {
-        $pattern = "/<$tag(.*?)>(.*?)<\/$tag>/is";
+	private static function getTagContent($tag, $string) {
+		$pattern = "/<$tag(.*?)>(.*?)<\/$tag>/is";
 
-        preg_match_all($pattern, $string, $matches);
-        $content = "";
-        for ($i = 0; $i < count($matches[0]); $i++) {
-            $currentMatch = strip_tags($matches[0][$i]);
-            if (strlen($currentMatch) >= 120) {
-                $content = $currentMatch;
-                break;
-            }
-        }
-        if ($content == "") {// if no long enough string was found
-            preg_match($pattern, $string, $matches);
-            if(isset($matches[0])) {// just use the first thing found, if anything
-            	$content = $matches[0];
-            }
-        }
-        return str_replace("&nbsp;", "", $content);
-    }
+		preg_match_all($pattern, $string, $matches);
+		$content = "";
+		for ($i = 0; $i < count($matches[0]); $i++) {
+			$currentMatch = strip_tags($matches[0][$i]);
+			if (strlen($currentMatch) >= 120) {
+				$content = $currentMatch;
+				break;
+			}
+		}
+		if ($content == "") {// if no long enough string was found
+			preg_match($pattern, $string, $matches);
+			if(isset($matches[0])) {// just use the first thing found, if anything
+				$content = $matches[0];
+			}
+		}
+		return str_replace("&nbsp;", "", $content);
+	}
 
-    static function isImage($url)
-    {
-        if (preg_match(Regex::$imagePrefixRegex, $url))
-            return true;
-        else
-            return false;
-    }
+	public static function isImage($url) {
+		return preg_match(Regex::$imagePrefixRegex, $url)
+			? true
+			: false;
+	}
 
-    static function getImages($text, $url, $imageQuantity)
-    {
-        $content = array();
+	public static function getImages($text, $url, $imageQuantity) {
+		$content = array();
 		// get all images from img src
-        if (preg_match_all(Regex::$imageRegex, $text, $matching)) {
+		if(preg_match_all(Regex::$imageRegex, $text, $matching)) {
 
-            for ($i = 0; $i < count($matching[0]); $i++) {
-                $src = "";
-                $pathCounter = substr_count($matching[0][$i], "../");
-                preg_match(Regex::$srcRegex, $matching[0][$i], $imgSrc);
+			for($i = 0; $i < count($matching[0]); $i++) {
+				$src = "";
+				$pathCounter = substr_count($matching[0][$i], "../");
+				preg_match(Regex::$srcRegex, $matching[0][$i], $imgSrc);
 
-                $imgSrc = Url::canonicalImgSrc($imgSrc[2]);
-                if (!preg_match(Regex::$httpRegex, $imgSrc)) {
-                    $src = Url::getImageUrl($pathCounter, Url::canonicalLink($imgSrc, $url));
-                }
-                if ($src . $imgSrc != $url) {
-                    if ($src == "")
-                        array_push($content, $src . $imgSrc);
-                    else
-                        array_push($content, $src);
-                }
-            }
-        }
+				$imgSrc = Url::canonicalImgSrc($imgSrc[2]);
+				if(!preg_match(Regex::$httpRegex, $imgSrc)) {
+					$src = Url::getImageUrl($pathCounter, Url::canonicalLink($imgSrc, $url));
+				}
+				if($src . $imgSrc != $url) {
+					if($src == "") {
+						array_push($content, $src . $imgSrc);
+					} else {
+						array_push($content, $src);
+					}
+				}
+			}
+		}
 
 		// get all full image urls from anywhere on the page
-        if (preg_match_all(Regex::$urlRegex, $text, $matching)) {
-        	for ($i = 0; $i < count($matching[0]); $i++) {
-        		if(self::isImage($matching[0][$i])) {
+		if (preg_match_all(Regex::$urlRegex, $text, $matching)) {
+			for ($i = 0; $i < count($matching[0]); $i++) {
+				if(self::isImage($matching[0][$i])) {
 					$content[] = $matching[0][$i];
-        		}
-        	}
-        }
-		
-        $content = array_unique($content);
-        $content = array_values($content);
+				}
+			}
+		}
 
-        $maxImages = $imageQuantity != -1 && $imageQuantity < count($content) ? $imageQuantity : count($content);
+		$content = array_unique($content);
+		$content = array_values($content);
 
-        $exclude_paths = ["bay_files.s3.amazonaws.com", "www.homeforsale.at"];
-        $images = array();
-        for ($i = 0; $i < count($content); $i++) {
-        	$excluded = false;
-        	foreach($exclude_paths as $path) {
-        		if(strpos($content[$i], $path) !== false) {
-        			$excluded = true;
-        			break;
-        		}
-        	}
-        	if($excluded) continue;
-        	try {
-        		$image = new FastImage($content[$i]);
-        		list($width, $height) = $image->getSize();
-        		if($width > 120 && $height > 120) {// avoids getting very small images
-        			$images[] = $content[$i];
-        			$maxImages--;
-        			if ($maxImages == 0)
-        				break;
-        		}
-        	} catch(\Exception $ex) {}// skip images that can't be fetched
-        }
+		$maxImages = $imageQuantity != -1 && $imageQuantity < count($content) ? $imageQuantity : count($content);
 
-        return $images;
-    }
+		$exclude_paths = ["bay_files.s3.amazonaws.com", "www.homeforsale.at"];
+		$images = array();
+		for($i = 0; $i < count($content); $i++) {
+			$excluded = false;
+			foreach($exclude_paths as $path) {
+				if(strpos($content[$i], $path) !== false) {
+					$excluded = true;
+					break;
+				}
+			}
+			if($excluded) continue;
+			try {
+				$image = new FastImage($content[$i]);
+				list($width, $height) = $image->getSize();
+				if($width > 120 && $height > 120) {// avoids getting very small images
+					$images[] = $content[$i];
+					$maxImages--;
+					if ($maxImages == 0) break;
+				}
+			} catch(\Exception $ex) {}// skip images that can't be fetched
+		}
 
-    static function getMetaTags($contents)
-    {
-        $result = false;
+		return $images;
+	}
 
-        if (isset($contents)) {
-            $list = array(
-                "UTF-8",
-                "EUC-CN",
-                "EUC-JP",
-                "EUC-KR",
-                'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4', 'ISO-8859-5',
-                'ISO-8859-6', 'ISO-8859-7', 'ISO-8859-8', 'ISO-8859-9', 'ISO-8859-10',
-                'ISO-8859-13', 'ISO-8859-14', 'ISO-8859-15', 'ISO-8859-16',
-                'Windows-1251', 'Windows-1252', 'Windows-1254',
-            );
+	public static function getMetaTags($contents) {
+		$result = false;
 
-            $encoding_check = mb_detect_encoding($contents, $list, true);
-            $encoding = ($encoding_check === false) ? "UTF-8" : $encoding_check;
+		if(isset($contents)) {
+			$list = [
+				"UTF-8",
+				"EUC-CN",
+				"EUC-JP",
+				"EUC-KR",
+				'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4', 'ISO-8859-5',
+				'ISO-8859-6', 'ISO-8859-7', 'ISO-8859-8', 'ISO-8859-9', 'ISO-8859-10',
+				'ISO-8859-13', 'ISO-8859-14', 'ISO-8859-15', 'ISO-8859-16',
+				'Windows-1251', 'Windows-1252', 'Windows-1254',
+			];
 
-            $metaTags = Content::getMetaTagsEncoding($contents, $encoding);
+			$encoding_check = mb_detect_encoding($contents, $list, true);
+			$encoding = ($encoding_check === false) ? "UTF-8" : $encoding_check;
 
-            $result = $metaTags;
-        }
+			$metaTags = Content::getMetaTagsEncoding($contents, $encoding);
 
-        return $result;
-    }
+			$result = $metaTags;
+		}
 
-    static function getMetaTagsEncoding($contents, $encoding)
-    {
-        $result = false;
-        $metaTags = array("url" => "", "title" => "", "description" => "", "images" => array());
+		return $result;
+	}
 
-        if (isset($contents)) {
+	public static function getMetaTagsEncoding($contents, $encoding) {
+		$result = false;
+		$metaTags = [
+			'url' => "",
+			'title' => "",
+			'description' => "",
+			'images' => []
+		];
 
-            $doc = new \DOMDocument('1.0', 'utf-8');
-            @$doc->loadHTML($contents);
+		if(!empty($contents)) {
 
-            $metas = $doc->getElementsByTagName('meta');
+			$doc = new \DOMDocument("1.0", "utf-8");
+			@$doc->loadHTML($contents);
 
-            for ($i = 0; $i < $metas->length; $i++) {
-                $meta = $metas->item($i);
-                if ($meta->getAttribute('name') == 'description')
-                    $metaTags["description"] = $meta->getAttribute('content');
-                if ($meta->getAttribute('name') == 'keywords')
-                    $metaTags["keywords"] = $meta->getAttribute('content');
-                if ($meta->getAttribute('property') == 'og:title')
-                    $metaTags["title"] = $meta->getAttribute('content');
-                if ($meta->getAttribute('property') === 'og:image' || $meta->getAttribute('name') === 'og:image')
-                    $metaTags["images"][] = $meta->getAttribute('content');
-                if ($meta->getAttribute('property') == 'og:description')
-                    $metaTags["og_description"] = $meta->getAttribute('content');
-                if ($meta->getAttribute('property') == 'og:url')
-                    $metaTags["url"] = $meta->getAttribute('content');
-            }
+			$metas = $doc->getElementsByTagName("meta");
 
-            if (!empty($metaTags["og_description"])) {
-                $metaTags["description"] = $metaTags["og_description"];
-            }
+			for($i = 0; $i < $metas->length; $i++) {
+				$meta = $metas->item($i);
+				if ($meta->getAttribute('name') === 'description') {
+					$metaTags["description"] = $meta->getAttribute('content');
+				}
+				if ($meta->getAttribute('name') === 'keywords') {
+					$metaTags["keywords"] = $meta->getAttribute('content');
+				}
+				if ($meta->getAttribute('property') === 'og:title') {
+					$metaTags["title"] = $meta->getAttribute('content');
+				}
+				if ($meta->getAttribute('property') === 'og:image' || $meta->getAttribute('name') === 'og:image') {
+					$metaTags["images"][] = $meta->getAttribute('content');
+				}
+				if ($meta->getAttribute('property') === 'og:description') {
+					$metaTags["og_description"] = $meta->getAttribute('content');
+				}
+				if ($meta->getAttribute('property') === 'og:url') {
+					$metaTags["url"] = $meta->getAttribute('content');
+				}
+			}
 
-            if (empty($metaTags["title"])) {
-                $nodes = $doc->getElementsByTagName('title');
+			if(!empty($metaTags["og_description"])) {
+				$metaTags["description"] = $metaTags["og_description"];
+			}
+
+			if(empty($metaTags["title"])) {
+				$nodes = $doc->getElementsByTagName('title');
 				if($nodes->length > 0) {
 					$metaTags["title"] = $nodes->item(0)->nodeValue;
 				}
-            }
+			}
 
-            $result = $metaTags;
-        }
-        return $result;
-    }
+			$result = $metaTags;
+		}
+		return $result;
+	}
 
-    static function separateMetaTagsContent($raw)
-    {
-        preg_match(Regex::$contentRegex1, $raw, $match);
-        if (count($match) == 0) {
-            preg_match(Regex::$contentRegex2, $raw, $match);
-        }
-        return $match[1];
-    }
+	public static function extendedTrim($content) {
+		return trim(str_replace("\n", " ", str_replace("\t", " ", preg_replace("/\s+/", " ", $content))));
+	}
 
-    static function extendedTrim($content)
-    {
-        return trim(str_replace("\n", " ", str_replace("\t", " ", preg_replace("/\s+/", " ", $content))));
-    }
-
-    static function isJson($string)
-    {
-        json_decode($string);
-        return (json_last_error() == JSON_ERROR_NONE);
-    }
-
-    static function stripIrrelevantTags($content)
-    {
-        $tags = array('style', 'script');
-        $content = preg_replace('#<(' . implode('|', $tags) . ')>.*?</\1>#s', '', $content);
-        return $content;
-    }
+	public static function isJson($string) {
+		json_decode($string);
+		return (json_last_error() == JSON_ERROR_NONE);
+	}
 }
 ?>
