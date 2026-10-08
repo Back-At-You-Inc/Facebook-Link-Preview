@@ -9,8 +9,8 @@
 include_once "classes/LinkPreview.php";
 
 use baymedia\facebooklinkpreview\LinkPreview;
-use baymedia\facebooklinkpreview\Regex;
 use baymedia\facebooklinkpreview\SetUp;
+use baymedia\facebooklinkpreview\Url;
 
 SetUp::init();
 
@@ -18,24 +18,9 @@ $text = $_POST["text"] ?? "";
 $imageQuantity = (int)($_POST["imagequantity"] ?? -1);
 $text = " " . str_replace("\n", " ", $text);
 
-// a url starts with a scheme or follows whitespace (mirrors the js urlRegex); prefer one with a scheme
 $answer = null;
-if (preg_match_all('~(?:https?://|(?<=\s))[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?::\d+)?(?:[/?#]\S*)?~i', $text, $matches)) {
-    $url = $matches[0][0];
-    foreach ($matches[0] as $candidate) {
-        if (preg_match(Regex::$httpRegex, $candidate)) {
-            $url = $candidate;
-            break;
-        }
-    }
-    $url = rtrim($url, ".,;:!?'\"");
-    // keep a closing paren only when it pairs with one in the url, e.g. wiki/Foo_(bar)
-    if (substr($url, -1) === ")" && substr_count($url, "(") < substr_count($url, ")")) {
-        $url = rtrim(substr($url, 0, -1), ".,;:!?'\"");
-    }
-    if (!preg_match(Regex::$httpRegex, $url)) {
-        $url = "http://" . $url;
-    }
+$url = Url::extractFromText($text);
+if ($url !== null) {
     $linkPreview = new LinkPreview();
     $answer = $linkPreview->crawl($url, $imageQuantity);
 }
