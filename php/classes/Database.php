@@ -15,18 +15,29 @@ include_once "HighLight.php";
 class Database
 {
 
+    private static $lastError = "";
+
     static function insert($save)
     {
         $conn = Database::connect();
+        if (!$conn) return null;
 
-        $save = array_map("mysql_real_escape_string", $save);
+        $stmt = $conn->prepare("INSERT INTO `linkpreview`.`linkpreview` (`id`, `text`, `image`, `title`, `canonicalUrl`, `url`, `description`, `iframe`)
+                        VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            self::$lastError = $conn->error;
+            Database::close($conn);
+            return null;
+        }
+        $stmt->bind_param("sssssss", $save["text"], $save["image"], $save["title"], $save["canonicalUrl"], $save["url"], $save["description"], $save["iframe"]);
 
-        $query = "INSERT INTO `linkpreview`.`linkpreview` (`id`, `text`, `image`, `title`, `canonicalUrl`, `url`, `description`, `iframe`)
-                        VALUES (NULL, '" . $save["text"] . "', '" . $save["image"] . "', '" . $save["title"] . "', '" . $save["canonicalUrl"] . "', '" . $save["url"] . "', '" . $save["description"] . "', '" . $save["iframe"] . "')";
-
-        mysql_query($query);
-
-        $id = mysql_insert_id($conn);
+        $id = null;
+        if ($stmt->execute()) {
+            $id = $conn->insert_id;
+        } else {
+            self::$lastError = $stmt->error;
+        }
+        $stmt->close();
 
         Database::close($conn);
 
@@ -36,12 +47,20 @@ class Database
     static function delete($delete)
     {
         $conn = Database::connect();
+        if (!$conn) return;
 
-        $delete = array_map("mysql_real_escape_string", $delete);
+        $stmt = $conn->prepare("DELETE FROM `linkpreview`.`linkpreview` WHERE `id` = ?");
+        if (!$stmt) {
+            self::$lastError = $conn->error;
+            Database::close($conn);
+            return;
+        }
+        $stmt->bind_param("i", $delete["id"]);
 
-        $query = "DELETE FROM `linkpreview`.`linkpreview` WHERE `id` = '" . $delete["id"] . "'";
-
-        mysql_query($query);
+        if (!$stmt->execute()) {
+            self::$lastError = $stmt->error;
+        }
+        $stmt->close();
 
         Database::close($conn);
     }
@@ -54,38 +73,53 @@ class Database
         $password = "";
         $database = "linkpreview";
 
-        if (!($connection = mysql_connect($host, $user, $password))) ;
+        mysqli_report(MYSQLI_REPORT_OFF);
+        $connection = new \mysqli($host, $user, $password, $database);
+        if ($connection->connect_error) {
+            self::$lastError = $connection->connect_error;
+            return null;
+        }
 
-        mysql_query("SET character_set_results=utf8", $connection);
         mb_language('uni');
         mb_internal_encoding('UTF-8');
 
-        if (!($db = mysql_select_db($database, $connection))) ;
-
-        mysql_query("set names 'utf8'", $connection);
+        $connection->set_charset("utf8");
 
         return $connection;
     }
 
     static function close($conn)
     {
-        mysql_close($conn);
+        $conn->close();
+    }
+
+    static function error()
+    {
+        return self::$lastError;
     }
 
     static function select()
     {
-        Database::connect();
+        $conn = Database::connect();
+        if (!$conn) return array();
 
-        $sth = mysql_query("SELECT * FROM `linkpreview` ORDER BY id DESC");
+        $result = $conn->query("SELECT * FROM `linkpreview` ORDER BY id DESC");
 
         $rows = array();
-        while ($r = mysql_fetch_assoc($sth)) {
+        if ($result) {
+            while ($r = $result->fetch_assoc()) {
 
-            $r["text"] = HighLight::url($r["text"]);
-            $r["description"] = HighLight::url($r["description"]);
+                $r["text"] = HighLight::url($r["text"]);
+                $r["description"] = HighLight::url($r["description"]);
 
-            array_push($rows, $r);
+                array_push($rows, $r);
+            }
+            $result->free();
+        } else {
+            self::$lastError = $conn->error;
         }
+
+        Database::close($conn);
 
         return $rows;
     }

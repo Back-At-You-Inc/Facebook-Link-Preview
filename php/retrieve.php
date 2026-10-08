@@ -11,6 +11,10 @@ include_once "classes/Database.php";
 include_once "classes/SetUp.php";
 include_once "classes/Json.php";
 
+use baymedia\facebooklinkpreview\Database;
+use baymedia\facebooklinkpreview\Json;
+use baymedia\facebooklinkpreview\SetUp;
+
 SetUp::headers();
 
 $header= "";

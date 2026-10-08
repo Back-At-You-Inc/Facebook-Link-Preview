@@ -10,21 +10,24 @@
 include_once "classes/Database.php";
 include_once "classes/SetUp.php";
 
+use baymedia\facebooklinkpreview\Database;
+use baymedia\facebooklinkpreview\SetUp;
+
 SetUp::headers();
 
 $save = array(
-    "text" => strip_tags($_POST["text"]),
-    "image" => strip_tags($_POST["image"]),
-    "title" => strip_tags($_POST["title"]),
-    "canonicalUrl" => strip_tags($_POST["canonicalUrl"]),
-    "url" => strip_tags($_POST["url"]),
-    "description" => strip_tags($_POST["description"]),
-    "iframe" => $_POST["iframe"],
+    "text" => strip_tags($_POST["text"] ?? ""),
+    "image" => strip_tags($_POST["image"] ?? ""),
+    "title" => strip_tags($_POST["title"] ?? ""),
+    "canonicalUrl" => strip_tags($_POST["canonicalUrl"] ?? ""),
+    "url" => strip_tags($_POST["url"] ?? ""),
+    "description" => strip_tags($_POST["description"] ?? ""),
+    "iframe" => $_POST["iframe"] ?? "",
 );
 
 $id = Database::insert($save);
 if ($id === null || $id === "") {
-    echo mysql_error();
+    echo Database::error();
 } else {
     echo $id;
 }

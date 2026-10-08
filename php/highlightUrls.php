@@ -14,11 +14,14 @@
 include_once "classes/SetUp.php";
 include_once "classes/HighLight.php";
 
+use baymedia\facebooklinkpreview\HighLight;
+use baymedia\facebooklinkpreview\SetUp;
+
 SetUp::init();
 
-error_reporting(false);
-$text = $_GET["text"];
-$description = $_GET["description"];
+error_reporting(0);
+$text = $_GET["text"] ?? "";
+$description = $_GET["description"] ?? "";
 
 $answer = array("urls" => HighLight::url($text), "description" => HighLight::url($description));
 

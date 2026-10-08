@@ -10,15 +10,18 @@
 include_once "classes/Database.php";
 include_once "classes/SetUp.php";
 
+use baymedia\facebooklinkpreview\Database;
+use baymedia\facebooklinkpreview\SetUp;
+
 SetUp::headers();
 
 $delete = array(
-    "id" => $_POST["id"],
+    "id" => (int)($_POST["id"] ?? 0),
 );
 
 Database::delete($delete);
 
-echo mysql_error();
+echo Database::error();
 
 
 

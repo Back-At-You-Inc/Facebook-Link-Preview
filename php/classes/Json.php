@@ -13,7 +13,7 @@ namespace baymedia\facebooklinkpreview;
 class Json {
 
     static function jsonSafe($data, $header){
-        if(strstr($header, "windows"))
+        if(strstr((string)$header, "windows"))
             return json_encode(Json::jsonFix($data));
         else
             return json_encode($data);
