@@ -28,6 +28,11 @@ if (preg_match_all('~(?:https?://|(?<=\s))[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}
             break;
         }
     }
+    $url = rtrim($url, ".,;:!?'\"");
+    // keep a closing paren only when it pairs with one in the url, e.g. wiki/Foo_(bar)
+    if (substr($url, -1) === ")" && substr_count($url, "(") < substr_count($url, ")")) {
+        $url = rtrim(substr($url, 0, -1), ".,;:!?'\"");
+    }
     if (!preg_match(Regex::$httpRegex, $url)) {
         $url = "http://" . $url;
     }
@@ -35,8 +40,9 @@ if (preg_match_all('~(?:https?://|(?<=\s))[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}
     $answer = $linkPreview->crawl($url, $imageQuantity);
 }
 
-// the js front end expects an object and fills in defaults for null fields
-echo $answer ?? json_encode([
+// the js front end expects an object (it fills in defaults for null fields), pageUrl, and "|"-joined images
+$answer = $answer !== null ? json_decode($answer, true) : null;
+$answer = is_array($answer) ? $answer : [
     'title' => null,
     'url' => null,
     'page_url' => null,
@@ -45,7 +51,13 @@ echo $answer ?? json_encode([
     'images' => null,
     'video' => null,
     'videoIframe' => null
-]);
+];
+$answer['pageUrl'] = $answer['page_url'];
+unset($answer['page_url']);
+if (is_array($answer['images'])) {
+    $answer['images'] = implode("|", $answer['images']);
+}
+echo json_encode($answer);
 
 SetUp::finish();
 

@@ -135,6 +135,8 @@ class Media
 			$matching = [];
 			preg_match('/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $hash['html'] ?? "", $matching);
 			$src = $matching[1] ?? "";
+		}
+		if (!empty($src)) {
 			array_push($media, $hash['thumbnail_url'] ?? "");
 			array_push($media, '<iframe id="' . date("YmdHis") . 'blip" width="472" height="246" src="' . $src . '" allowFullScreen frameborder=0></iframe>');
 		} else {
@@ -152,6 +154,8 @@ class Media
 			$matching = [];
 			preg_match('/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $hash['html'] ?? "", $matching);
 			$src = $matching[1] ?? "";
+		}
+		if (!empty($src)) {
 			array_push($media, $hash['thumbnail_url'] ?? "");
 			array_push($media, '<iframe id="' . date("YmdHis") . 'funnyordie" width="472" height="246" src="' . $src . '" allowFullScreen frameborder=0></iframe>');
 		} else {
