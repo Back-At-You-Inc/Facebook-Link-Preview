@@ -14,7 +14,7 @@ namespace baymedia\facebooklinkpreview;
 class FastImage
 {
 	private $strpos = 0;
-	private $str;
+	private $str = '';
 	private $type;
 	private $handle;
 
@@ -28,7 +28,8 @@ class FastImage
 	{
 		if ($this->handle) $this->close();
 
-		$this->handle = fopen($uri, 'r');
+		$this->handle = @fopen($uri, 'r');
+		if ($this->handle === false) throw new \RuntimeException("Unable to open $uri");
 	}
 
 
@@ -39,7 +40,7 @@ class FastImage
 			fclose($this->handle);
 			$this->handle = null;
 			$this->type = null;
-			$this->str = null;
+			$this->str = '';
 		}
 	}
 
@@ -49,7 +50,8 @@ class FastImage
 		$this->strpos = 0;
 		if ($this->getType())
 		{
-			return array_values($this->parseSize());
+			$size = $this->parseSize();
+			return is_array($size) ? array_values($size) : false;
 		}
 
 		return false;
@@ -104,6 +106,7 @@ class FastImage
 	private function parseSizeForPNG()
 	{
 		$chars = $this->getChars(25);
+		if ($chars === false || strlen($chars) < 24) return false;
 
 		return unpack("N*", substr($chars, 16, 8));
 	}
@@ -112,6 +115,7 @@ class FastImage
 	private function parseSizeForGIF()
 	{
 		$chars = $this->getChars(11);
+		if ($chars === false || strlen($chars) < 10) return false;
 
 		return unpack("S*", substr($chars, 6, 4));
 	}
@@ -120,6 +124,7 @@ class FastImage
 	private function parseSizeForBMP()
 	{
 		$chars = $this->getChars(29);
+		if ($chars === false || strlen($chars) < 26) return false;
 	 	$chars = substr($chars, 14, 14);
 		$type = unpack('C', $chars);
 
@@ -169,7 +174,9 @@ class FastImage
 					break;
 
 				case 'skipframe':
-					$skip = $this->readInt($this->getChars(2)) - 2;
+					$len = $this->readInt($this->getChars(2));
+					if ($len === false || $len < 2) return false;
+					$skip = $len - 2;
 					$state = 'doskip';
 					break;
 
@@ -180,6 +187,8 @@ class FastImage
 
 				case 'readsize':
 					$c = $this->getChars(7);
+
+					if ($c === false || strlen($c) < 7) return false;
 
 					return array($this->readInt(substr($c, 5, 2)), $this->readInt(substr($c, 3, 2)));
 			}
@@ -222,6 +231,7 @@ class FastImage
 	private function getByte()
 	{
 		$c = $this->getChars(1);
+		if ($c === false || $c === '') return false;
 		$b = unpack("C", $c);
 
 		return reset($b);
@@ -230,6 +240,7 @@ class FastImage
 
 	private function readInt($str)
 	{
+		if (!is_string($str) || strlen($str) < 2) return false;
 		$size = unpack("C*", $str);
 
 		return ($size[1] << 8) + $size[2];

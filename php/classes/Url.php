@@ -10,6 +10,8 @@
 /** This class handles url analysis */
 namespace baymedia\facebooklinkpreview;
 
+include_once "Regex.php";
+
 class Url
 {
     static function canonicalLink($imgSrc, $referrer) {
@@ -86,6 +88,30 @@ class Url
             $src = $url;
         }
         return $src;
+    }
+
+    /** First http(s) url in free text (else the first bare domain), with trailing punctuation removed; null when none. */
+    static function extractFromText($text) {
+        // a url starts with a scheme or follows whitespace (mirrors the js urlRegex)
+        if (!preg_match_all('~(?:https?://|(?<=\s))[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?::\d+)?(?:[/?#]\S*)?~i', " " . $text, $matches)) {
+            return null;
+        }
+        $url = $matches[0][0];
+        foreach ($matches[0] as $candidate) {
+            if (preg_match(Regex::$httpRegex, $candidate)) {
+                $url = $candidate;
+                break;
+            }
+        }
+        $url = rtrim($url, ".,;:!?'\"");
+        // keep a closing paren only when it pairs with one in the url, e.g. wiki/Foo_(bar)
+        if (substr($url, -1) === ")" && substr_count($url, "(") < substr_count($url, ")")) {
+            $url = rtrim(substr($url, 0, -1), ".,;:!?'\"");
+        }
+        if (!preg_match(Regex::$httpRegex, $url)) {
+            $url = "http://" . $url;
+        }
+        return $url;
     }
 }
 ?>

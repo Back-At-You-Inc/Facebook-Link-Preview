@@ -34,7 +34,7 @@ class Media
 		$url = str_replace("http://", "", $url);
 		$breakUrl = explode("/", $url);
 		$media = [];
-		if ($breakUrl[2] != "") {
+		if (($breakUrl[2] ?? "") != "") {
 			$vid = $breakUrl[2];
 			array_push($media, Media::mediaVineThumb($vid));
 			array_push($media, '<iframe id="' . date("YmdHis") . $vid . '" class="vine-embed" src="https://vine.co/v/' . $vid . '/embed/simple" width="472" height="246" frameborder="0"></iframe><script async src="//platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>');
@@ -45,11 +45,11 @@ class Media
 	}
 
 	static function mediaVineThumb($id) {
-		$vine = file_get_contents("http://vine.co/v/{$id}");
+		$vine = (string)@file_get_contents("http://vine.co/v/{$id}");
 		$matches = [];
 		preg_match('/property="og:image" content="(.*?)"/', $vine, $matches);
 
-		return ($matches[1]) ? $matches[1] : false;
+		return !empty($matches[1]) ? $matches[1] : false;
 	}
 
 	/** Return iframe code for Vimeo videos */
@@ -58,11 +58,12 @@ class Media
 		$url = str_replace("http://", "", $url);
 		$breakUrl = explode("/", $url);
 		$media = [];
-		if ($breakUrl[1] != "") {
+		if (($breakUrl[1] ?? "") != "") {
 			$imgId = $breakUrl[1];
 			if(strpos($imgId, "?") !== false) {
 				$imgId = explode("?", $imgId)[0];
 			}
+			$hash = null;
 			$contents = @file_get_contents("http://vimeo.com/api/v2/video/$imgId.php");
 			if($contents) {
 				$hash = unserialize($contents);
@@ -80,7 +81,7 @@ class Media
 		$media = [];
 		$matching = [];
 		preg_match('|metacafe\.com/watch/([\w\-\_]+)(.*)|', $url, $matching);
-		if ($matching[1] != "") {
+		if (($matching[1] ?? "") != "") {
 			$vid = $matching[1];
 			$vtitle = trim($matching[2], "/");
 			array_push($media, "https://s4.mcstatic.com/thumb/{$vid}/0/6/videos/0/6/{$vtitle}.jpg");
@@ -113,11 +114,11 @@ class Media
 		$media = [];
 		$matching = [];
 		preg_match('#(?<=video/).*?(?=/)#', $url, $matching);
-		$id = $matching[0];
+		$id = $matching[0] ?? "";
 		if ($id != "") {
-			$hash = file_get_contents("http://www.collegehumor.com/oembed.json?url=http://www.dailymotion.com/embed/video/$id");
-			$hash = json_decode($hash, true);
-			array_push($media, $hash['thumbnail_url']);
+			$hash = @file_get_contents("http://www.collegehumor.com/oembed.json?url=http://www.dailymotion.com/embed/video/$id");
+			$hash = json_decode((string)$hash, true);
+			array_push($media, $hash['thumbnail_url'] ?? "");
 			array_push($media, '<iframe id="' . date("YmdHis") . $id . '" width="472" height="246" src="https://www.collegehumor.com/e/' . $id . '" allowFullScreen frameborder=0></iframe>');
 		} else {
 			array_push($media, "", "");
@@ -129,12 +130,14 @@ class Media
 	static function mediaBlip($url) {
 		$media = [];
 		if ($url != "") {
-			$hash = file_get_contents("http://blip.tv/oembed?url=$url");
-			$hash = json_decode($hash, true);
+			$hash = @file_get_contents("http://blip.tv/oembed?url=$url");
+			$hash = json_decode((string)$hash, true);
 			$matching = [];
-			preg_match('/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $hash['html'], $matching);
-			$src = $matching[1];
-			array_push($media, $hash['thumbnail_url']);
+			preg_match('/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $hash['html'] ?? "", $matching);
+			$src = $matching[1] ?? "";
+		}
+		if (!empty($src)) {
+			array_push($media, $hash['thumbnail_url'] ?? "");
 			array_push($media, '<iframe id="' . date("YmdHis") . 'blip" width="472" height="246" src="' . $src . '" allowFullScreen frameborder=0></iframe>');
 		} else {
 			array_push($media, "", "");
@@ -146,12 +149,14 @@ class Media
 	static function mediaFunnyordie($url) {
 		$media = [];
 		if ($url != "") {
-			$hash = file_get_contents("http://www.funnyordie.com/oembed.json?url=$url");
-			$hash = json_decode($hash, true);
+			$hash = @file_get_contents("http://www.funnyordie.com/oembed.json?url=$url");
+			$hash = json_decode((string)$hash, true);
 			$matching = [];
-			preg_match('/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $hash['html'], $matching);
-			$src = $matching[1];
-			array_push($media, $hash['thumbnail_url']);
+			preg_match('/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $hash['html'] ?? "", $matching);
+			$src = $matching[1] ?? "";
+		}
+		if (!empty($src)) {
+			array_push($media, $hash['thumbnail_url'] ?? "");
 			array_push($media, '<iframe id="' . date("YmdHis") . 'funnyordie" width="472" height="246" src="' . $src . '" allowFullScreen frameborder=0></iframe>');
 		} else {
 			array_push($media, "", "");

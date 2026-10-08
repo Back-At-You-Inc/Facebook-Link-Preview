@@ -143,12 +143,12 @@ class LinkPreview
 			$flagged = false;
 
 			if(!isset($result_json_decoded->title)) {
-				$answer['title'] = utf8_encode($title);
+				$answer['title'] = mb_convert_encoding($title, 'UTF-8', 'ISO-8859-1');
 				$flagged = true;
 			}
 
 			if(!isset($result_json_decoded->description)) {
-				$answer['description'] = utf8_encode($description);
+				$answer['description'] = mb_convert_encoding($description, 'UTF-8', 'ISO-8859-1');
 				$flagged = true;
 			}
 
@@ -182,7 +182,6 @@ class LinkPreview
 		curl_setopt_array($ch, $options);
 		$content = curl_exec($ch);
 		$header = curl_getinfo($ch);
-		curl_close($ch);
 
 		$curl_header_size = $header['header_size'];
 		$body = trim(mb_substr($content, $curl_header_size));
@@ -199,7 +198,7 @@ class LinkPreview
 		return [
 			'content' => $body,
 			'url' => $header['url'],
-			'header' => $header['content_type'],
+			'header' => $header['content_type'] ?? '',
 			'headers' => $aHeaders
 		];
 	}

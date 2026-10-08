@@ -107,13 +107,15 @@ class Content
 			if($excluded) continue;
 			try {
 				$image = new FastImage($content[$i]);
-				list($width, $height) = $image->getSize();
+				$size = $image->getSize();
+				if(!is_array($size)) continue;
+				list($width, $height) = $size;
 				if($width > 120 && $height > 120) {// avoids getting very small images
 					$images[] = $content[$i];
 					$maxImages--;
 					if ($maxImages == 0) break;
 				}
-			} catch(\Exception $ex) {}// skip images that can't be fetched
+			} catch(\Throwable $ex) {}// skip images that can't be fetched
 		}
 
 		return $images;
